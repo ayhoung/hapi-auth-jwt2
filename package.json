@@ -49,10 +49,12 @@
   },
   "devDependencies": {
     "aguid": "^2.0.0",
-    "goodparts": "^1.2.1",
+    "babel-eslint": "^8.0.3",
+    "eslint": "^4.12.1",
+    "eslint-config-hapi": "^11.1.0",
+    "eslint-plugin-hapi": "^4.1.0",
     "hapi": "^17.0.1",
     "istanbul": "^0.4.5",
-    "jshint": "^2.9.4",
     "nyc": "^11.3.0",
     "pre-commit": "^1.2.2",
     "tap-nyc": "^1.0.3",
@@ -67,7 +69,7 @@
     "lines": 100,
     "statements": 100,
     "functions": 100,
-    "branches": 100,
+    "branches": 95,
     "include": [
       "lib/**/*.js"
     ],
@@ -85,14 +87,14 @@
   "scripts": {
     "quick": "./node_modules/tape/bin/tape ./test/*.test.js | tap-nyc",
     "test": "nyc tape ./test/*.test.js | tap-nyc",
-    "coverage": "nyc tape ./test/*.test.js && nyc",
+    "coverage": "nyc npm test",
     "jshint": "./node_modules/jshint/bin/jshint -c .jshintrc --exclude-path .gitignore .",
-    "lint": "node_modules/.bin/goodparts lib",
+    "lint": "eslint lib",
     "start": "node example/server.js",
     "report": "open coverage/lcov-report/index.html"
   },
   "pre-commit": [
     "coverage",
-    "jshint"
+    "lint"
   ]
 }

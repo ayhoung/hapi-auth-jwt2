@@ -2,30 +2,32 @@ const Hapi   = require('hapi');
 const secret = 'NeverShareYourSecret';
 
 // for debug options see: http://hapijs.com/tutorials/logging
-let debug;
-// debug = { debug: { 'request': ['error', 'uncaught'] } };
-debug = { debug: false };
+// const debug = { debug: { 'request': ['error', 'uncaught'] } };
+const debug = { debug: false };
 const server = new Hapi.Server(debug);
 
-const sendToken = function(req, reply) {
+const sendToken = function (req, reply) {
+
   return req.auth.token || null;
 };
 
-const privado = function(req, reply) {
+const privado = function (req, reply) {
+
   return req.auth.credentials;
 };
 
 // defining our own validate function lets us do something
 // useful/custom with the decodedToken before reply(ing)
 const customVerify = function (decoded, request) {
-  if(decoded.error) {
+
+  if (decoded.error) {
     throw new Error('customVerify fails!');
   }
   else if (decoded.custom_error) {
     throw new Error(decoded.custom_error);
   }
   else if (decoded.some_property) {
-    return { valid: true, credentials: decoded};
+    return { valid: true, credentials: decoded };
   }
   else {
     return { valis: false };
@@ -33,15 +35,18 @@ const customVerify = function (decoded, request) {
 };
 
 const customErrorFunc = function (errorContext) {
+
   const result = errorContext;
   if (errorContext.message.toString().search(/ignore/) >= 0) {
     result = null;
-  } else if (errorContext.errorType === 'unauthorized') {
-    result.message = "Invalid credentials mate";
+  }
+  else if (errorContext.errorType === 'unauthorized') {
+    result.message = 'Invalid credentials mate';
   }
   return result;
 };
-const init = async() => {
+const init = async () => {
+
   await server.register(require('../'));
 
   server.auth.strategy('jwt', 'jwt', {

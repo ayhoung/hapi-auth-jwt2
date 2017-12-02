@@ -5,29 +5,33 @@ const secret = 'NeverShareYourSecret';
 const server = new Hapi.Server({ debug: false });
 
 const db = {
-  "123": { allowed: true,  "name": "Charlie" },
-  "321": { allowed: false, "name": "Old Gregg" }
+  '123': { allowed: true,  'name': 'Charlie' },
+  '321': { allowed: false, 'name': 'Old Gregg' }
 };
 
 // defining our own validate function lets us do something
 // useful/custom with the decodedToken before reply(ing)
 const validate = function (decoded, request) {
-  return { valid: db[decoded.id].allowed}
+
+  return { valid: db[decoded.id].allowed };
 };
 
-const home = function(req, reply) {
+const home = function (req, reply) {
+
   return 'Hai!';
 };
 
-const privado = function(req, reply) {
+const privado = function (req, reply) {
+
   return 'worked';
 };
 const init = async () => {
+
   await server.register(require('../'));
   server.auth.strategy('jwt', 'jwt', {
     key: secret,
     validate,
-    verifyOptions: { algorithms: [ 'HS256' ] },
+    verifyOptions: { algorithms: ['HS256'] },
     urlKey: 'customUrlKey', // This is really what we are testing here
     cookieKey: 'customCookieKey',  // idem
     tokenType: 'MyAuthScheme'
@@ -40,7 +44,7 @@ const init = async () => {
     { method: 'POST', path: '/optional', handler: privado, config: { auth: { mode: 'optional', strategy: 'jwt' } } },
     { method: 'POST', path: '/try', handler: privado, config: { auth: { mode: 'try', strategy: 'jwt' } } }
   ]);
-}
+};
 init();
 
 module.exports = server;

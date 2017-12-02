@@ -10,20 +10,21 @@ const multiTenantSecretKeys = {
 };
 
 const db = {
-  "123": { allowed: true,  "name": "Charlie"   },
-  "321": { allowed: false, "name": "Old Gregg" }
+  '123': { allowed: true,  'name': 'Charlie'   },
+  '321': { allowed: false, 'name': 'Old Gregg' }
 };
 
 const keyFunc = function (decoded) {
+
   if (decoded.tenant) {
     const keys = multiTenantSecretKeys[decoded.tenant];
 
     if (keys) {
-      return {key: keys, additional: 'something extra here if needed' };
+      return { key: keys, additional: 'something extra here if needed' };
     }
-    else {
-      throw Boom.unauthorized('Key not found');
-    }
+
+    throw Boom.unauthorized('Key not found');
+
   }
   else {
     throw Boom.badRequest('Tenant was not specified in token payload');
@@ -33,6 +34,7 @@ const keyFunc = function (decoded) {
 // defining our own validate function lets us do something
 // useful/custom with the decodedToken before reply(ing)
 const validate = function (decoded, request) {
+
   if (db[decoded.id].allowed) {
     const credentials = decoded;
 
@@ -40,26 +42,29 @@ const validate = function (decoded, request) {
       credentials.extraInfo = request.plugins['hapi-auth-jwt2'].extraInfo;
     }
 
-    return {valid: true, credentials};
+    return { valid: true, credentials };
   }
-  else {
-    return {valid:false};
-  }
+
+  return { valid:false };
+
 };
 
-const home = function(req, h) {
+const home = function (req, h) {
+
   return 'Hai!';
 };
 
-const privado = function(req, h) {
+const privado = function (req, h) {
+
   const data = (req.auth.credentials.extraInfo) ? req.auth.credentials.extraInfo : null;
 
   return {
     message: 'success',
-    data: data
+    data
   };
 };
-const init = async() => {
+const init = async () => {
+
   await server.register(require('../'));
 
   server.auth.strategy('jwt', 'jwt', { key: keyFunc, validate });

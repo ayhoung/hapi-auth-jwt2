@@ -5,92 +5,98 @@ const secret = 'NeverShareYourSecret';
 const server = new Hapi.Server({ debug: false });
 
 const db = {
-    "123": { allowed: true,  "name": "Charlie"  },
-    "321": { allowed: false, "name": "Old Gregg"}
+  '123': { allowed: true,  'name': 'Charlie'  },
+  '321': { allowed: false, 'name': 'Old Gregg' }
 };
 
 // defining our own validate function lets us do something
 // useful/custom with the decodedToken before reply(ing)
 const validate = function (decoded, request, callback) {
-    if (db[decoded.id].allowed) {
-        return {valid: true};
-    }
-    else {
-        return {valid: false};
-    }
+
+  if (db[decoded.id].allowed) {
+    return { valid: true };
+  }
+
+  return { valid: false };
+
 };
 
-const home = function(req, h) {
-    return 'Hai!';
+const home = function (req, h) {
+
+  return 'Hai!';
 };
 
-const privado = function(req, h) {
-    return 'worked';
+const privado = function (req, h) {
+
+  return 'worked';
 };
 
-const sendToken = function(req, h) {
-    return req.auth.token;
+const sendToken = function (req, h) {
+
+  return req.auth.token;
 };
 
-const responseFunction = function(req, h) {
-    const error = null;
-    if(req.headers.error === 'true') {
-        throw new Error('failed');
-    } else {
-        req.response.header('Authorization', 'from scheme response function');
-    }
-}
+const responseFunction = function (req, h) {
 
-const init = async() => {
+  const error = null;
+  if (req.headers.error === 'true') {
+    throw new Error('failed');
+  }
+  else {
+    req.response.header('Authorization', 'from scheme response function');
+  }
+};
 
-    await server.register(require('../'));
+const init = async () => {
 
-    server.auth.strategy('jwt', 'jwt', {
-        key: secret,
-        validate,
-        verifyOptions: {
-            algorithms: [ 'HS256' ]
-        }, // only allow HS256 algorithm
-        responseFunc: responseFunction
-    });
+  await server.register(require('../'));
 
-    server.route([
-        {
-            method: 'GET',
-            path: '/',
-            handler: home,
-            config: {
-                auth: false
-            }
-        },
-        {
-            method: 'GET',
-            path: '/token',
-            handler: sendToken,
-            config: {
-                auth: 'jwt'
-            }
-        },
-        {
-            method: 'POST',
-            path: '/privado',
-            handler: privado,
-            config: {
-                auth: 'jwt'
-            }
-        },
-        {
-            method: 'POST',
-            path: '/required',
-            handler: privado,
-            config: {
-                auth: {
-                    mode: 'required',
-                    strategy: 'jwt'
-                }
-            }
+  server.auth.strategy('jwt', 'jwt', {
+    key: secret,
+    validate,
+    verifyOptions: {
+      algorithms: ['HS256']
+    }, // only allow HS256 algorithm
+    responseFunc: responseFunction
+  });
+
+  server.route([
+    {
+      method: 'GET',
+      path: '/',
+      handler: home,
+      config: {
+        auth: false
+      }
+    },
+    {
+      method: 'GET',
+      path: '/token',
+      handler: sendToken,
+      config: {
+        auth: 'jwt'
+      }
+    },
+    {
+      method: 'POST',
+      path: '/privado',
+      handler: privado,
+      config: {
+        auth: 'jwt'
+      }
+    },
+    {
+      method: 'POST',
+      path: '/required',
+      handler: privado,
+      config: {
+        auth: {
+          mode: 'required',
+          strategy: 'jwt'
         }
-    ]);
+      }
+    }
+  ]);
 
 };
 

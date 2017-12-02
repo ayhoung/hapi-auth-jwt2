@@ -5,67 +5,72 @@ const secret = 'NeverShareYourSecret';
 const server = new Hapi.Server({ debug: false });
 
 const db = {
-  "123": { allowed: true,  "name": "Charlie"  },
-  "321": { allowed: false, "name": "Old Gregg"}
+  '123': { allowed: true,  'name': 'Charlie'  },
+  '321': { allowed: false, 'name': 'Old Gregg' }
 };
 
 // defining our own validate function lets us do something
 // useful/custom with the decodedToken before reply(ing)
-const validate = async function (decoded, request) {
+const validate = function (decoded, request) {
+
   if (db[decoded.id].allowed) {
-    return {valid: true};
+    return { valid: true };
   }
-  else {
-    return {valid: false};
-  }
+
+  return { valid: false };
+
 };
 
-const home = function(req, h) {
+const home = function (req, h) {
+
   return 'Hai!';
 };
 
-const privado = function(req, h) {
+const privado = function (req, h) {
+
   return 'worked';
 };
 
-const sendToken = function(req, h) {
+const sendToken = function (req, h) {
+
   return req.auth.token;
 };
 
-const init = async () =>{ 
+const init = async () => {
+
   try {
     await server.register(require('../'));
     server.auth.strategy('jwt', 'jwt', {
       key: secret,
       validate,
-      verifyOptions: { algorithms: [ 'HS256' ] } // only allow HS256 algorithm
+      verifyOptions: { algorithms: ['HS256'] } // only allow HS256 algorithm
     });
 
     server.auth.strategy('jwt-nourl', 'jwt', {
       key: secret,
       validate,
-      verifyOptions: { algorithms: [ 'HS256' ] }, // only allow HS256 algorithm
+      verifyOptions: { algorithms: ['HS256'] }, // only allow HS256 algorithm
       urlKey: false
     });
 
     server.auth.strategy('jwt-nocookie', 'jwt', {
       key: secret,
       validate,
-      verifyOptions: { algorithms: [ 'HS256' ] }, // only allow HS256 algorithm
+      verifyOptions: { algorithms: ['HS256'] }, // only allow HS256 algorithm
       cookieKey: false
     });
 
     server.auth.strategy('jwt-nourl2', 'jwt', {
       key: secret,
       validate,
-      verifyOptions: { algorithms: [ 'HS256' ] }, // only allow HS256 algorithm
+      verifyOptions: { algorithms: ['HS256'] }, // only allow HS256 algorithm
       urlKey: ''
     });
 
     server.auth.strategy('jwt-nocookie2', 'jwt', {
       key: secret,
       validate,
-      verifyOptions: { algorithms: [ 'HS256' ] }, // only allow HS256 algorithm
+      verifyOptions: { algorithms: ['HS256'] }, // only allow HS256 algorithm
       cookieKey: ''
     });
 
@@ -81,15 +86,11 @@ const init = async () =>{
       { method: 'POST', path: '/optional', handler: privado, config: { auth: { mode: 'optional', strategy: 'jwt' } } },
       { method: 'POST', path: '/try', handler: privado, config: { auth: { mode: 'try', strategy: 'jwt' } } }
     ]);
-  } catch(e) {
+  }
+  catch (e) {
     throw e;
   }
-}
+};
 init();
-
-process.on('unhandledRejection', function(reason, p){
-  console.log("Possibly Unhandled Rejection at: Promise ", p, " reason: ", reason);
-  // application specific logging here
-});
 
 module.exports = server;
